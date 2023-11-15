@@ -171,7 +171,7 @@ def optimize_model():
     # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
     # columns of actions taken. These are the actions which would've been taken
     # for each batch state according to policy_net
-    state_action_values = policy_net(state_batch).gather(1, action_batch)
+    state_action_values = policy_net(state_batch).flatten(1, 2).gather(1, action_batch)
 
     # Compute V(s_{t+1}) for all next states.
     # Expected values of actions for non_final_next_states are computed based
@@ -180,7 +180,7 @@ def optimize_model():
     # state value or 0 in case the state was final.
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
     with torch.no_grad():
-        next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0]
+        next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].max(1)[0]
     # Compute the expected Q values
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
@@ -224,7 +224,7 @@ def train_model():
     if torch.cuda.is_available():
         num_episodes = 600
     else:
-        num_episodes = 200
+        num_episodes = 50
 
     for i_episode in range(num_episodes):
         # Initialize the environment and get it's state
@@ -262,13 +262,16 @@ def train_model():
                 episode_durations.append(t + 1)
                 plot_durations()
                 break
-#train_model()
+
+
+#env = gym.make("Qbert", render_mode="human")
+train_model()
 torch.save(policy_net.state_dict(), args.save)
 
 print('Complete')
 plot_durations(show_result=True)
-#plt.ioff()
-#plt.show()
+plt.ioff()
+plt.show()
 run_model(1000)
 
 

@@ -261,13 +261,13 @@ def train_model():
                 episode_durations.append(t + 1)
                 plot_durations()
                 break
-#train_model()
+train_model()
 torch.save(policy_net.state_dict(), args.save)
 
 print('Complete')
 plot_durations(show_result=True)
 #plt.ioff()
 #plt.show()
-run_model(1000)
+#run_model(1000)
 
 
